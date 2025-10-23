@@ -1,7 +1,5 @@
 /*!
- * \file      timer.h
  * \brief     Controller for a hardware timer module.
- * \copyright ARM University Program &copy; ARM Ltd 2014.
  */
 #ifndef TIMER_H
 #define TIMER_H
@@ -25,5 +23,3 @@ void timer_enable(void);
 void timer_disable(void);
 
 #endif // TIMER_H
-
-// *******************************ARM University Program Copyright © ARM Ltd 2014*************************************   

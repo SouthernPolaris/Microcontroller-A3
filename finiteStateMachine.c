@@ -1,28 +1,38 @@
 #include "finiteStateMachine.h"
 
+#define UP = 0x02
+#define DOWN = 0x01
+#define LEFT = 0x00
+#define RIGHT = 0x04
+
 void fsmInit() {
-    currentState = STATE_IDLE;
+    currentState = IDLE;
 }
 
-State fsmGetCurrentState() {
+wavetype fsmGetCurrentState() {
     return currentState;
 }
 
-State fsmUpdate(int joystickValue) {
+wavetype fsmUpdate(char joystickValue) {
     switch (currentState) {
-        case STATE_IDLE:
-            if (joystickValue > 0) {
-                currentState = STATE_SQUARE;
+        case IDLE:
+            if (joystickValue == 0x01) {
+							currentState = IDLE;
             }
             break;
-        case STATE_SQUARE:
-            if (joystickValue < 0) {
-                currentState = STATE_TRIANGLE;
+        case SQUARE:
+            if (joystickValue == 0x04) {
+                currentState = SQUARE;
             }
             break;
-        case STATE_TRIANGLE:
-            if (joystickValue == 0) {
-                currentState = STATE_IDLE;
+        case RAMP:
+            if (joystickValue == 0x00) {
+                currentState = RAMP;
+            }
+            break;
+				case SINE:
+						if (joystickValue == 0x02) {
+                currentState = SINE;
             }
             break;
     }

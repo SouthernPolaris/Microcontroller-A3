@@ -72,5 +72,3 @@ int adc_read(char channel) {
 	return (data);
 
 }
-
-// *******************************ARM University Program Copyright © ARM Ltd 2014*************************************   

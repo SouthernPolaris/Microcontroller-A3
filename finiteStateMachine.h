@@ -1,18 +1,15 @@
 #ifndef FINITE_STATE_MACHINE_H
 #define FINITE_STATE_MACHINE_H
 
-typedef enum {
-    STATE_IDLE,
-    STATE_SQUARE,
-    STATE_TRIANGLE,
-} State;
+#include "wave.h"
 
-State currentState;
+wavetype currentState = IDLE;
 
 void fsmInit();
 
-State fsmGetCurrentState();
+wavetype fsmGetCurrentState();
 
-State fsmUpdate(int joystickValue);
+wavetype fsmUpdate(char joystickValue);
 
 #endif // FINITE_STATE_MACHINE_H
+

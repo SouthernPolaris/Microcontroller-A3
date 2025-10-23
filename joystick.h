@@ -1,8 +1,9 @@
 #ifndef JOYSTICK_H
 #define JOYSTICK_H
 
-void initPortsForJoystick();
+#include "platform.h"
 
-int readJoystick();
+void initPortsForJoystick(void);
+int readJoystick(Pin pin);
 
 #endif // JOYSTICK_H
