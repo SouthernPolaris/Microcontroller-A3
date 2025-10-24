@@ -5,15 +5,6 @@
 #include <platform.h>
 #include <stdint.h>
 
-/*
- * Wave generator driven by a timer callback. The timer is expected to fire
- * at `interrupt_rate_us` microsecond intervals (default 10 us). For a
- * requested frequency `f`, we compute how many timer ticks make up one
- * waveform period (samples_per_period). On every timer tick we advance the
- * sample index and compute the appropriate DAC value scaled to the full
- * DAC range (DAC_BITS from platform.h).
- */
-
 #define DEFAULT_INTERRUPT_US 10u
 
 /* Use the platform DAC mask to obtain full DAC range (e.g. 10-bit). */
@@ -27,10 +18,16 @@ static uint32_t samples_per_period = 1; /* number of timer ticks per waveform pe
 static uint32_t interrupt_rate_us = DEFAULT_INTERRUPT_US; /* microseconds */
 
 static void wavegen_update(void) {
-    uint32_t steps = samples_per_period;
-    uint32_t idx = sample_idx;
-    uint32_t val = 0;
+    uint32_t steps;
+    uint32_t idx;
+    uint32_t val;
+    uint32_t denom;
 
+    steps = samples_per_period;
+    idx = sample_idx;
+    val = 0;
+
+    // Double check this
     if (steps < 2) {
         /* fallback to at least 2 steps to avoid div-by-zero and allow a square */
         steps = 2;
@@ -45,7 +42,7 @@ static void wavegen_update(void) {
             if (steps <= 1) {
                 val = 0;
             } else {
-                uint32_t denom = steps - 1;
+                denom = steps - 1;
                 if (idx <= (denom / 2)) {
                     /* rising edge */
                     val = (uint32_t)((((uint64_t)idx) * 2 * MAX_DAC_VALUE) / denom);
@@ -90,6 +87,8 @@ void wavegen_setWaveform(wavetype type) {
 }
 
 void wavegen_setFrequency(float frequency) {
+    uint32_t ticks;
+    
     currentFrequency = frequency;
     if (currentFrequency <= 0.0f) {
         samples_per_period = 1;
@@ -100,7 +99,7 @@ void wavegen_setFrequency(float frequency) {
     float period_us = 1e6f / currentFrequency;
 
     /* compute how many timer ticks (interrupts) per waveform period */
-    uint32_t ticks = (uint32_t)(period_us / (float)interrupt_rate_us + 0.5f);
+    ticks = (uint32_t)(period_us / (float)interrupt_rate_us + 0.5f);
 
     if (ticks < 1) ticks = 1;
     samples_per_period = ticks;

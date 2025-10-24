@@ -17,7 +17,7 @@ wavetype fsmUpdate(char joystickValue) {
     switch (currentState) {
         case IDLE:
             if (joystickValue == 0x01) {
-							currentState = IDLE;
+                currentState = IDLE;
             }
             break;
         case SQUARE:
