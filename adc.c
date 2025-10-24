@@ -72,3 +72,11 @@ int adc_read(char channel) {
 	return (data);
 
 }
+
+int adc_read_voltage(char channel) {
+	
+	int adc_value = adc_read(channel);
+	float voltage = ( (float)adc_value * ADC_VREF ) / 4095.0f;
+	return voltage;
+	
+}

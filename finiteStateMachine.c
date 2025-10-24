@@ -25,14 +25,14 @@ wavetype fsmUpdate(char joystickValue) {
                 currentState = SQUARE;
             }
             break;
-        case RAMP:
+        case TRIANGLE:
             if (joystickValue == 0x00) {
-                currentState = RAMP;
+                currentState = TRIANGLE;
             }
             break;
-				case SINE:
-						if (joystickValue == 0x02) {
-                currentState = SINE;
+        case SAWTOOTH:
+            if (joystickValue == 0x02) {
+                currentState = SAWTOOTH;
             }
             break;
     }

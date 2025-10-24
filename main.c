@@ -1,8 +1,9 @@
 #include <platform.h>
 #include "adc.h"
+#include "dac.h"
 #include "joystick.h"
-#include "comparator.h"
 #include "finiteStateMachine.h"
+#include "wavegen.h"
 #include "calcFrequency.h"
 
 int main(void) {
@@ -10,8 +11,8 @@ int main(void) {
     // Initialise all functions
 		adc_init();
 		initPortsForJoystick();
-		comparator_init();
-		tone_init();
+		dac_init();
+		wavegen_init();
 		fsmInit();
     // Set FSM to idle wave
 		
@@ -21,13 +22,13 @@ int main(void) {
 		while(1) {
 	
 			// RUN ADC Read on VC
-			float vc = adc_read(1);
+			float vc = adc_read_voltage(1);
 		
 			// RUN ADC Read on modulation
-			float mod = adc_read(2);
-		
+			float mod = adc_read_voltage(2);
+
 			// RUN ADC Read on potentiometer
-			float base = adc_read(0);
+			float base = adc_read_voltage(0);
 
 			// Create frequency output from formula
 			

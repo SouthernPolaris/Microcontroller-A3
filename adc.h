@@ -16,4 +16,6 @@ void adc_init(void);
  */
 int adc_read(char channel);
 
+int adc_read_voltage(char channel);
+
 #endif // ADC_H
