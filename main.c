@@ -41,12 +41,11 @@ int main(void) {
 			wavetype state = fsmUpdate(joystickOut);
 
 			// OUTPUT WAVE
-			// TODO: MODIFY THIS to not do set cycles but have a timer interrupt until new joystick state is triggered
+			// TODO: Have a timer interrupt until new joystick state is triggered
 			// NEED TO Set up an interrupt as this isnt LFO
 			// Interrupt is equivalent to step
 			// Needed so loop time doesnt add onto wave time
-			// When reaches voltage max of 1023, step down
-			// Dont do tone play
+			// When reaches voltage max of 1023 (apparently is actually 4096 as 12 bit ADC but double check), step down
 			wavegen_setFrequency(freq);
 			wavegen_setWaveform(state);
 		}

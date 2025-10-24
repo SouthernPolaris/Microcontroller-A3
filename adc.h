@@ -1,8 +1,3 @@
-/*!
- * \file      adc.h
- * \brief     Internal analogue to digital converter (ADC) controller.
- * \copyright ARM University Program &copy; ARM Ltd 2014.
- */
 #ifndef ADC_H
 #define ADC_H
 
