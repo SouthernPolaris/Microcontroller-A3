@@ -9,3 +9,4 @@ typedef enum {
 } wavetype;
 
 #endif // WAVE_H
+

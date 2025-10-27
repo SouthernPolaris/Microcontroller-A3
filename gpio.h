@@ -9,7 +9,7 @@
 #ifndef PINS_H
 #define PINS_H
 
-#include <platform.h>
+#include "platform.h"
 
 /*! This enum describes the directional setup of a GPIO pin. */
 typedef enum {

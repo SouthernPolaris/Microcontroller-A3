@@ -1,5 +1,5 @@
-#include <platform.h>
-#include <adc.h>
+#include "platform.h"
+#include "adc.h"
 
 //ADC power control
 //PCONP
@@ -15,7 +15,7 @@
 #define ADC_PORT_SELECT(n)        ((uint32_t)((1)<<n))
 
 #define ADC_SAMPLING_FREQUENCY       (400000)                 //400kHz
-#define ADC_VREF                     (3.3)
+#define ADC_VREF                     (3.3f)
 
 uint8_t GET_ADC0_Port(Pin pin){
 	
@@ -74,9 +74,13 @@ int adc_read(char channel) {
 }
 
 int adc_read_voltage(char channel) {
+	int adc_value;
+	float voltage;
+	float temp;
 	
-	int adc_value = adc_read(channel);
-	float voltage = ( (float)adc_value * ADC_VREF ) / 4095.0f;
+	adc_value = adc_read(channel);
+	temp = ((float)adc_value * ADC_VREF);
+	voltage = temp / 4095.0f;
 	return voltage;
 	
 }

@@ -1,6 +1,6 @@
 #include <LPC407x_8x_177x_8x.h>
-#include <platform.h>
-#include <gpio.h>
+#include "platform.h"
+#include "gpio.h"
 
 #define PCONP_PCGPIO    (1UL<<15)
 

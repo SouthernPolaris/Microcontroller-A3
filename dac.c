@@ -1,5 +1,5 @@
-#include <dac.h>
-#include <platform.h>
+#include "dac.h"
+#include "platform.h"
 #include "LPC407x_8x_177x_8x.h"
 
 //DAC power setting

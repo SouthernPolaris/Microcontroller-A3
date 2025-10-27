@@ -3,13 +3,12 @@
 
 #include "wave.h"
 
-wavetype currentState = IDLE;
+extern wavetype currentState;
 
-void fsmInit();
+void fsmInit(void);
 
-wavetype fsmGetCurrentState();
+wavetype fsmGetCurrentState(void);
 
-wavetype fsmUpdate(char joystickValue);
+wavetype fsmUpdate(void);
 
 #endif // FINITE_STATE_MACHINE_H
-

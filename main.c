@@ -1,4 +1,4 @@
-#include <platform.h>
+#include "platform.h"
 #include "adc.h"
 #include "dac.h"
 #include "joystick.h"
@@ -7,13 +7,14 @@
 #include "calcFrequency.h"
 
 int main(void) {
-	float vc;
-	float mod;
-	float base;
-	float freq;
-	int joystickOut;
-	wavetype state;
+	volatile float vc;
+	volatile float mod;
+	volatile float base;
+	volatile float freq;
+	volatile wavetype state;
 
+	volatile uint32_t debugFreq;
+	
     // Initialise all functions
 	adc_init();
 	initPortsForJoystick();
@@ -23,12 +24,11 @@ int main(void) {
     // Set FSM to idle wave
 		
 	// IDLE
-	fsmUpdate(0x01);
 	
 	while(1) {
 
 		// RUN ADC Read on VC
-		vc = adc_read_voltage(1);
+		vc = 1.0f; //adc_read_voltage(1);
 	
 		// RUN ADC Read on modulation
 		mod = adc_read_voltage(2);
@@ -40,11 +40,8 @@ int main(void) {
 		
 		freq = calculateFrequency(vc, mod, base);
 
-		// READ joystick
-		joystickOut = readJoystick(5);
-
 		// FSM SET WAVE STATE --- LED indicator as well
-		state = fsmUpdate(joystickOut);
+		state = fsmUpdate();
 
 		// OUTPUT WAVE
 		// TODO: Have a timer interrupt until new joystick state is triggered
@@ -52,7 +49,7 @@ int main(void) {
 		// Interrupt is equivalent to step
 		// Needed so loop time doesnt add onto wave time
 		// When reaches voltage max of 1023 (apparently is actually 4096 as 12 bit ADC but double check), step down
-		wavegen_setFrequency(freq);
+		debugFreq = wavegen_setFrequency(freq);
 		wavegen_setWaveform(state);
 	}
 }

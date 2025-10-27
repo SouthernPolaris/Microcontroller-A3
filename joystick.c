@@ -1,6 +1,6 @@
 #include "joystick.h"
-#include <platform.h>
-#include <gpio.h>
+#include "platform.h"
+#include "gpio.h"
 
 void initPortsForJoystick() {
 	gpio_set_mode(P_SW_UP, PullUp); //Set up as input with pullup resistor
