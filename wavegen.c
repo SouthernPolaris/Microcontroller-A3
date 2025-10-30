@@ -30,124 +30,49 @@ static void wavegen_update(void) {
     idx = sample_idx;
     val = 0;
 	
-		if (steps < 2) steps = 2;
-		half = steps / 2;
+	if (steps < 2) steps = 2;
+	half = steps / 2;
 
-
-//		for(idx = sample_idx; idx < samples_per_period; idx++) {
-//			switch (currentWaveform) {
-//        case SQUARE:
-//            if (idx < half) {
-//							val = MAX_DAC_VALUE;
-//						} else {
-//							val = 0;
-//						}
-//            break;
-//        case TRIANGLE:
-//            /* Use (steps-1) as denominator so endpoints map exactly to 0 to MAX */
-//            if (idx < half) {
-//								val = (uint32_t)((uint64_t)idx * MAX_DAC_VALUE) / (half);
-//						} else {
-//								val = (uint32_t)(((uint64_t) steps - idx) * MAX_DAC_VALUE) / (half);
-//						}
-//						
-//            break;
-//        case SAWTOOTH:
-//            /* Map 0 to (steps-1) to 0 to MAX_DAC_VALUE so last sample reaches MAX */
-//            val = (idx * MAX_DAC_VALUE) / (steps - 1);
-
-//						break;
-//				default:
-//            val = 0;
-//            break;
-//				
-//				
-//			}
-//			
-//			if (val > MAX_DAC_VALUE) val = MAX_DAC_VALUE;
-//						dac_set((int)val);
-//			
-//			
-//			delay_val = steps * (1/currentFrequency);
-//			delay_us(delay_val);
-//		}
-
-	
-	
-			for(idx = sample_idx; idx < 50; idx++) {
-				switch (currentWaveform) {
-					case SQUARE:
-							if (idx < 25) {
-								val = MAX_DAC_VALUE;
-							} else {
-								val = 0;
-							}
-							break;
-					case TRIANGLE:
-							/* Use (steps-1) as denominator so endpoints map exactly to 0 to MAX */
-							if (idx < 25) {
-									
-									val += (MAX_DAC_VALUE / 25);
-								//val = (uint32_t)((uint64_t)idx * MAX_DAC_VALUE) / (25);
-							} else {
-									val -= (MAX_DAC_VALUE / 25);
-									//val = (uint32_t)(((uint64_t) steps - idx) * MAX_DAC_VALUE) / (25);
-							}
-							
-							break;
-					case SAWTOOTH:
-							/* Map 0 to (steps-1) to 0 to MAX_DAC_VALUE so last sample reaches MAX */
-							val += ((MAX_DAC_VALUE) / (50));
-
-							break;
-					default:
-							val = 0;
-							break;
-					
-					
+	for(idx = sample_idx; idx < 50; idx++) {
+		switch (currentWaveform) {
+			case SQUARE:
+				if (idx < 25) {
+					val = MAX_DAC_VALUE;
+				} else {
+					val = 0;
+				}
+				break;
+			case TRIANGLE:
+				/* Use (steps-1) as denominator so endpoints map exactly to 0 to MAX */
+				if (idx < 25) {
+						
+						val += (MAX_DAC_VALUE / 25);
+					//val = (uint32_t)((uint64_t)idx * MAX_DAC_VALUE) / (25);
+				} else {
+						val -= (MAX_DAC_VALUE / 25);
+						//val = (uint32_t)(((uint64_t) steps - idx) * MAX_DAC_VALUE) / (25);
 				}
 				
-				if (val > MAX_DAC_VALUE) val = MAX_DAC_VALUE;
-							dac_set((int)val);
-				
-				
-				delay_val = (steps * interrupt_rate_us) / 50;
-				delay_us(delay_val);
-			}
-	
-//    switch (currentWaveform) {
-//        case SQUARE:
-//            if (idx < half) {
-//							val = MAX_DAC_VALUE;
-//						} else {
-//							val = 0;
-//						}
-//            break;
-//        case TRIANGLE:
-//            /* Use (steps-1) as denominator so endpoints map exactly to 0 to MAX */
-//            if (idx < half) {
-//								val = (uint32_t)((uint64_t)idx * MAX_DAC_VALUE) / (half);
-//						} else {
-//								val = (uint32_t)(((uint64_t) steps - idx) * MAX_DAC_VALUE) / (half);
-//						}
-//						
-//            break;
-//        case SAWTOOTH:
-//            /* Map 0 to (steps-1) to 0 to MAX_DAC_VALUE so last sample reaches MAX */
-//            val = (idx * MAX_DAC_VALUE) / (steps - 1);
+				break;
+			case SAWTOOTH:
+				/* Map 0 to (steps-1) to 0 to MAX_DAC_VALUE so last sample reaches MAX */
+				val += ((MAX_DAC_VALUE) / (50));
 
-//						break;
-//				default:
-//            val = 0;
-//            break;
-//		}
+				break;
+			default:
+				val = 0;
+				break;
+
+		}
 		
-    /* clamp to DAC range and output */
-//    if (val > MAX_DAC_VALUE) val = MAX_DAC_VALUE;
-//    dac_set((int)val);
-
-    /* advance index */
-    //sample_idx = (sample_idx + 1) % samples_per_period;
+		if (val > MAX_DAC_VALUE) val = MAX_DAC_VALUE;
+					dac_set((int)val);
+		
+		
+		delay_val = (steps * interrupt_rate_us) / 50;
+		delay_us(delay_val);
+	}
+	
 }
 
 void wavegen_init(void) {
