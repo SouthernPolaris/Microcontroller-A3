@@ -73,7 +73,7 @@ int adc_read(char channel) {
 
 }
 
-int adc_read_voltage(char channel) {
+float adc_read_voltage(char channel) {
 	int adc_value;
 	float voltage;
 	float temp;

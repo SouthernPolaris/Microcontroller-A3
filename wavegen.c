@@ -3,120 +3,184 @@
 #include "timer.h"
 #include "dac.h"
 #include "platform.h"
+#include "delay.h"
 #include <stdint.h>
-#include <math.h>
 
 #define DEFAULT_INTERRUPT_US 10u
-#define TABLE_SIZE 256u
 
-static volatile wavetype currentWaveform = IDLE;
-static volatile float currentFrequency = 440.0f;
+/* Use the platform DAC mask to obtain full DAC range (e.g. 10-bit). */
+#define MAX_DAC_VALUE (1023)
 
-/* Full-scale DAC range */
-static const uint32_t MAX_DAC = (uint32_t)DAC_MASK;
+volatile wavetype currentWaveform = IDLE;
+float currentFrequency = 440.0f;
+static int val;
 
-/* Waveform lookup tables */
-static uint16_t table_sine[TABLE_SIZE];
-static uint16_t table_triangle[TABLE_SIZE];
-static uint16_t table_saw[TABLE_SIZE];
-static uint16_t table_square[TABLE_SIZE];
+uint32_t sample_idx = 0;
+volatile uint32_t samples_per_period = 1; /* number of timer ticks per waveform period */
+uint32_t interrupt_rate_us = DEFAULT_INTERRUPT_US; /* microseconds */
 
-/* DDS variables */
-static volatile float phase = 0.0f;
-static volatile float step_size = 0.0f;
-static uint32_t interrupt_rate_us = DEFAULT_INTERRUPT_US;
-
-static void build_tables(void) {
-    for (uint32_t i = 0; i < TABLE_SIZE; ++i) {
-        /* sine: [-1,1] → [0, MAX_DAC] */
-        float s = sinf((2.0f * (float)M_PI * (float)i) / (float)TABLE_SIZE);
-        table_sine[i] = (uint16_t)((s * 0.5f + 0.5f) * (float)MAX_DAC + 0.5f);
-
-        /* triangle: rise then fall */
-        if (i < TABLE_SIZE / 2) {
-            table_triangle[i] = (uint16_t)(((uint64_t)i * 2ull * MAX_DAC) / TABLE_SIZE);
-        } else {
-            table_triangle[i] = (uint16_t)((((uint64_t)(TABLE_SIZE - i)) * 2ull * MAX_DAC) / TABLE_SIZE);
-        }
-
-        /* sawtooth: 0 → MAX linearly */
-        if (TABLE_SIZE > 1) {
-            table_saw[i] = (uint16_t)((((uint64_t)i) * MAX_DAC) / (TABLE_SIZE - 1));
-        } else {
-            table_saw[i] = 0;
-        }
-
-        /* square: first half low, second half high */
-        table_square[i] = (i < (TABLE_SIZE / 2)) ? 0 : (uint16_t)MAX_DAC;
-    }
-}
-
-/* -------------------- Timer callback -------------------- */
 static void wavegen_update(void) {
-    uint32_t idx = (uint32_t)phase;
-    uint32_t val = 0;
+    volatile uint32_t steps;
+    volatile uint32_t idx;
 
-    /* Wrap index safely */
-    if (idx >= TABLE_SIZE)
-        idx = TABLE_SIZE - 1;
+    volatile uint32_t half;
+		volatile int delay_val;
 
-    switch (currentWaveform) {
-        case SQUARE:
-            val = table_square[idx];
-            break;
-        case TRIANGLE:
-            val = table_triangle[idx];
-            break;
-        case SAWTOOTH:
-            val = table_saw[idx];
-            break;
-        case SINE:
-            val = table_sine[idx];
-            break;
-        default:
-            val = 0;
-            break;
-    }
+    steps = samples_per_period;
+    idx = sample_idx;
+    val = 0;
+	
+		if (steps < 2) steps = 2;
+		half = steps / 2;
 
-    if (val > MAX_DAC) val = MAX_DAC;
-    dac_set((int)val);
 
-    /* Advance phase by fractional step size */
-    phase += step_size;
-    if (phase >= (float)TABLE_SIZE)
-        phase -= (float)TABLE_SIZE;
+//		for(idx = sample_idx; idx < samples_per_period; idx++) {
+//			switch (currentWaveform) {
+//        case SQUARE:
+//            if (idx < half) {
+//							val = MAX_DAC_VALUE;
+//						} else {
+//							val = 0;
+//						}
+//            break;
+//        case TRIANGLE:
+//            /* Use (steps-1) as denominator so endpoints map exactly to 0 to MAX */
+//            if (idx < half) {
+//								val = (uint32_t)((uint64_t)idx * MAX_DAC_VALUE) / (half);
+//						} else {
+//								val = (uint32_t)(((uint64_t) steps - idx) * MAX_DAC_VALUE) / (half);
+//						}
+//						
+//            break;
+//        case SAWTOOTH:
+//            /* Map 0 to (steps-1) to 0 to MAX_DAC_VALUE so last sample reaches MAX */
+//            val = (idx * MAX_DAC_VALUE) / (steps - 1);
+
+//						break;
+//				default:
+//            val = 0;
+//            break;
+//				
+//				
+//			}
+//			
+//			if (val > MAX_DAC_VALUE) val = MAX_DAC_VALUE;
+//						dac_set((int)val);
+//			
+//			
+//			delay_val = steps * (1/currentFrequency);
+//			delay_us(delay_val);
+//		}
+
+	
+	
+			for(idx = sample_idx; idx < 50; idx++) {
+				switch (currentWaveform) {
+					case SQUARE:
+							if (idx < 25) {
+								val = MAX_DAC_VALUE;
+							} else {
+								val = 0;
+							}
+							break;
+					case TRIANGLE:
+							/* Use (steps-1) as denominator so endpoints map exactly to 0 to MAX */
+							if (idx < 25) {
+									
+									val += (MAX_DAC_VALUE / 25);
+								//val = (uint32_t)((uint64_t)idx * MAX_DAC_VALUE) / (25);
+							} else {
+									val -= (MAX_DAC_VALUE / 25);
+									//val = (uint32_t)(((uint64_t) steps - idx) * MAX_DAC_VALUE) / (25);
+							}
+							
+							break;
+					case SAWTOOTH:
+							/* Map 0 to (steps-1) to 0 to MAX_DAC_VALUE so last sample reaches MAX */
+							val += ((MAX_DAC_VALUE) / (50));
+
+							break;
+					default:
+							val = 0;
+							break;
+					
+					
+				}
+				
+				if (val > MAX_DAC_VALUE) val = MAX_DAC_VALUE;
+							dac_set((int)val);
+				
+				
+				delay_val = (steps * interrupt_rate_us) / 50;
+				delay_us(delay_val);
+			}
+	
+//    switch (currentWaveform) {
+//        case SQUARE:
+//            if (idx < half) {
+//							val = MAX_DAC_VALUE;
+//						} else {
+//							val = 0;
+//						}
+//            break;
+//        case TRIANGLE:
+//            /* Use (steps-1) as denominator so endpoints map exactly to 0 to MAX */
+//            if (idx < half) {
+//								val = (uint32_t)((uint64_t)idx * MAX_DAC_VALUE) / (half);
+//						} else {
+//								val = (uint32_t)(((uint64_t) steps - idx) * MAX_DAC_VALUE) / (half);
+//						}
+//						
+//            break;
+//        case SAWTOOTH:
+//            /* Map 0 to (steps-1) to 0 to MAX_DAC_VALUE so last sample reaches MAX */
+//            val = (idx * MAX_DAC_VALUE) / (steps - 1);
+
+//						break;
+//				default:
+//            val = 0;
+//            break;
+//		}
+		
+    /* clamp to DAC range and output */
+//    if (val > MAX_DAC_VALUE) val = MAX_DAC_VALUE;
+//    dac_set((int)val);
+
+    /* advance index */
+    //sample_idx = (sample_idx + 1) % samples_per_period;
 }
 
 void wavegen_init(void) {
-    build_tables();
+    /* initialise timer using configured interrupt period and enable callback */
     timer_init(interrupt_rate_us);
     timer_set_callback(wavegen_update);
     timer_enable();
 }
 
 void wavegen_setWaveform(wavetype type) {
+		if (currentWaveform != type) {
+			val = 0;
+		}
     currentWaveform = type;
-    phase = 0.0f;
+    sample_idx = 0; /* Reset sample index when changing waveform */
 }
 
-
 uint32_t wavegen_setFrequency(float frequency) {
-    if (frequency <= 0.0f) {
-        step_size = 0.0f;
-        currentFrequency = 0.0f;
-        return 0;
-    }
-
+	float period_us;
+    uint32_t ticks;
+    
     currentFrequency = frequency;
 
-    /* Compute step size for DDS */
-    float update_rate = 1e6f / (float)interrupt_rate_us;
-    step_size = ((float)TABLE_SIZE * frequency) / update_rate;
 
-    /* Prevent overflow or NaN */
-    if (step_size < 0.0001f) step_size = 0.0001f;
-    if (step_size > (float)TABLE_SIZE) step_size = (float)TABLE_SIZE;
+    /* period in microseconds */
+    period_us = 1e6f / currentFrequency;
 
-    phase = 0.0f;
-    return (uint32_t)(step_size * 1000.0f);
+    /* compute how many timer ticks (interrupts) per waveform period */
+    ticks = (uint32_t)(period_us / (float)interrupt_rate_us);
+
+    if (ticks < 1) ticks = 1;
+    samples_per_period = ticks;
+    sample_idx = 0;
+	
+		return samples_per_period;
 }

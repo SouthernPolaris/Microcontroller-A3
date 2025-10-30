@@ -28,13 +28,13 @@ int main(void) {
 	while(1) {
 
 		// RUN ADC Read on VC
-		vc = 1.0f; //adc_read_voltage(1);
+		vc = adc_read_voltage(0);
 	
 		// RUN ADC Read on modulation
-		mod = adc_read_voltage(2);
+		mod = 1.5; //adc_read_voltage(2);
 
 		// RUN ADC Read on potentiometer
-		base = adc_read_voltage(0);
+		base = adc_read_voltage(1);
 
 		// Create frequency output from formula
 		
