@@ -3,7 +3,6 @@
 #include "timer.h"
 #include "dac.h"
 #include "platform.h"
-#include "delay.h"
 #include <stdint.h>
 
 #define DEFAULT_INTERRUPT_US 10u
