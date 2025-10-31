@@ -11,53 +11,53 @@
 /* Use the platform DAC mask to obtain full DAC range (e.g. 10-bit). */
 #define MAX_DAC_VALUE (1023)
 
+// Variables to hold current waveform and frequency
 volatile wavetype currentWaveform = IDLE;
 float currentFrequency = 440.0f;
 static int val;
 
+// Sample index and samples per period
 uint32_t sample_idx = 0;
 volatile uint32_t samples_per_period = 1; /* number of timer ticks per waveform period */
+
+uint32_t STEPS_PER_WAVEFORM = 50;
 uint32_t interrupt_rate_us = DEFAULT_INTERRUPT_US; /* microseconds */
 
+// Update waveform output based on current settings
 static void wavegen_update(void) {
     volatile uint32_t steps;
     volatile uint32_t idx;
 
     volatile uint32_t half;
-		volatile int delay_val;
+	volatile int delay_val;
 
     steps = samples_per_period;
     idx = sample_idx;
     val = 0;
-	
+
+	// Avoid division by zero
 	if (steps < 2) steps = 2;
 	half = steps / 2;
 
-	for(idx = sample_idx; idx < 50; idx++) {
+	// Generate waveform samples
+	for(idx = sample_idx; idx < STEPS_PER_WAVEFORM; idx++) {
 		switch (currentWaveform) {
 			case SQUARE:
-				if (idx < 25) {
+				if (idx < (STEPS_PER_WAVEFORM / 2)) {
 					val = MAX_DAC_VALUE;
 				} else {
 					val = 0;
 				}
 				break;
 			case TRIANGLE:
-				/* Use (steps-1) as denominator so endpoints map exactly to 0 to MAX */
-				if (idx < 25) {
-						
-						val += (MAX_DAC_VALUE / 25);
-					//val = (uint32_t)((uint64_t)idx * MAX_DAC_VALUE) / (25);
+				if (idx < (STEPS_PER_WAVEFORM / 2)) {
+					val += (MAX_DAC_VALUE / (STEPS_PER_WAVEFORM / 2));
 				} else {
-						val -= (MAX_DAC_VALUE / 25);
-						//val = (uint32_t)(((uint64_t) steps - idx) * MAX_DAC_VALUE) / (25);
+					val -= (MAX_DAC_VALUE / (STEPS_PER_WAVEFORM / 2));
 				}
-				
 				break;
 			case SAWTOOTH:
-				/* Map 0 to (steps-1) to 0 to MAX_DAC_VALUE so last sample reaches MAX */
-				val += ((MAX_DAC_VALUE) / (50));
-
+				val += ((MAX_DAC_VALUE) / (STEPS_PER_WAVEFORM));
 				break;
 			default:
 				val = 0;
@@ -67,14 +67,16 @@ static void wavegen_update(void) {
 		
 		if (val > MAX_DAC_VALUE) val = MAX_DAC_VALUE;
 					dac_set((int)val);
-		
-		
-		delay_val = (steps * interrupt_rate_us) / 50;
+
+		delay_val = (steps * interrupt_rate_us) / STEPS_PER_WAVEFORM;
 		delay_us(delay_val);
 	}
 	
 }
 
+/**
+ * Initialise waveform generator
+ */
 void wavegen_init(void) {
     /* initialise timer using configured interrupt period and enable callback */
     timer_init(interrupt_rate_us);
@@ -82,6 +84,10 @@ void wavegen_init(void) {
     timer_enable();
 }
 
+/**
+ * Set the current waveform type
+ * \param type Waveform type to set
+ */
 void wavegen_setWaveform(wavetype type) {
 		if (currentWaveform != type) {
 			val = 0;
@@ -90,6 +96,11 @@ void wavegen_setWaveform(wavetype type) {
     sample_idx = 0; /* Reset sample index when changing waveform */
 }
 
+/**
+ * Set the frequency of the waveform
+ * \param frequency Frequency to set (in Hz)
+ * \return Number of samples per period
+ */
 uint32_t wavegen_setFrequency(float frequency) {
 	float period_us;
     uint32_t ticks;
@@ -107,5 +118,5 @@ uint32_t wavegen_setFrequency(float frequency) {
     samples_per_period = ticks;
     sample_idx = 0;
 	
-		return samples_per_period;
+	return samples_per_period;
 }

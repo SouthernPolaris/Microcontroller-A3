@@ -21,9 +21,6 @@ int main(void) {
 	dac_init();
 	wavegen_init();
 	fsmInit();
-    // Set FSM to idle wave
-		
-	// IDLE
 	
 	while(1) {
 
@@ -44,11 +41,6 @@ int main(void) {
 		state = fsmUpdate();
 
 		// OUTPUT WAVE
-		// TODO: Have a timer interrupt until new joystick state is triggered
-		// NEED TO Set up an interrupt as this isnt LFO
-		// Interrupt is equivalent to step
-		// Needed so loop time doesnt add onto wave time
-		// When reaches voltage max of 1023 (apparently is actually 4096 as 12 bit ADC but double check), step down
 		debugFreq = wavegen_setFrequency(freq);
 		wavegen_setWaveform(state);
 	}

@@ -1,8 +1,8 @@
 #ifndef ADC_H
 #define ADC_H
 
-/*! \brief Initializes the analogue to digital converter, and configures
- *         the appropriate GPIO pin.
+/*! \brief Initialises the analogue to digital converter, and configures
+ * the appropriate GPIO pin.
  */
 void adc_init(void);
 

@@ -13,6 +13,9 @@
 //Received value of output at DAC
 #define DAC_VALUE(n)        ((uint32_t)((n&0x3FF)<<6))
 
+/**
+ * Initialise DAC peripheral
+ */
 void dac_init(void) {
 	
   //DAC Pin initialisation 
@@ -21,6 +24,10 @@ void dac_init(void) {
 	
 }
 
+/**
+ * Set DAC output value
+ * \param value Value to set DAC output to (0 to 1023 for 10-bit DAC)
+ */
 void dac_set(int value) {
 	  
   LPC_DAC->CR = DAC_VALUE(value);

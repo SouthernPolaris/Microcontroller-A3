@@ -1,8 +1,8 @@
 #ifndef DAC_H
 #define DAC_H
 
-/*! \brief Initializes the digital to analogue converter, and configures
- *         the appropriate GPIO pin.
+/*! \brief Initialises the digital to analogue converter, and configures
+ * the appropriate GPIO pin.
  */
 void dac_init(void);
 

@@ -27,6 +27,9 @@ uint8_t GET_ADC0_Port(Pin pin){
 
 }
 
+/**
+ * Initialise ADC peripheral
+ */
 void adc_init(void) {
 	
     uint32_t temp;
@@ -57,6 +60,10 @@ void adc_init(void) {
 
 }
 
+/**
+ * Read ADC value from specified channel
+ * \return ADC value between 0 and 4095 (12-bit resolution)
+ */
 int adc_read(char channel) {
 	
 	uint32_t data;
@@ -73,6 +80,11 @@ int adc_read(char channel) {
 
 }
 
+/**
+ * Read ADC voltage from specified channel
+ * Calls adc_read() as subroutine
+ * \return Voltage at the pin in Volts, between 0 and VREF
+ */
 float adc_read_voltage(char channel) {
 	int adc_value;
 	float voltage;

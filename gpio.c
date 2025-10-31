@@ -8,8 +8,13 @@ uint32_t IRQ_status;
 uint32_t IRQ_port_num;
 uint32_t IRQ_pin_index;
 
+// Callback function pointer
 static void (*GPIO_callback)(int status);
 
+/**
+ * Toggle the state of a GPIO pin
+ * \param pin Pin to toggle
+ */
 void gpio_toggle(Pin pin) {
 	
 	LPC_GPIO_TypeDef* p = GET_GPIO_PORT(pin);
@@ -20,6 +25,11 @@ void gpio_toggle(Pin pin) {
 
 }
 
+/**
+ * Set the state of a GPIO pin
+ * \param pin Pin to set
+ * \param value Value to set the pin to (0 or 1)
+ */
 void gpio_set(Pin pin, int value) {
 	
 	LPC_GPIO_TypeDef* p = GET_GPIO_PORT(pin);
@@ -30,6 +40,11 @@ void gpio_set(Pin pin, int value) {
 		
 }
 
+/**
+ * Get the state of a GPIO pin
+ * \param pin Pin to read
+ * \return State of the pin (0 or 1)
+ */
 int gpio_get(Pin pin) {
 	
 	LPC_GPIO_TypeDef* p = GET_GPIO_PORT(pin);
@@ -38,6 +53,12 @@ int gpio_get(Pin pin) {
 
 }
 
+/**
+ * Set the state of a range of GPIO pins
+ * \param pin_base Base pin of the range
+ * \param count Number of pins in the range
+ * \param value Value to set the pins to (bitmask)
+ */
 void gpio_set_range(Pin pin_base, int count, int value) {
 	
 	LPC_GPIO_TypeDef* p = GET_GPIO_PORT(pin_base);
@@ -48,6 +69,12 @@ void gpio_set_range(Pin pin_base, int count, int value) {
 	
 }
 
+/**
+ * Get the state of a range of GPIO pins
+ * \param pin_base Base pin of the range
+ * \param count Number of pins in the range
+ * \return State of the pins
+ */
 unsigned int gpio_get_range(Pin pin_base, int count) {
 	
 	LPC_GPIO_TypeDef* p = GET_GPIO_PORT(pin_base);
@@ -56,6 +83,11 @@ unsigned int gpio_get_range(Pin pin_base, int count) {
 
 }
 
+/**
+ * Set the mode of a GPIO pin
+ * \param pin Pin to configure
+ * \param mode Mode to set the pin to
+ */
 void gpio_set_mode(Pin pin, PinMode mode) {
 	
 	LPC_GPIO_TypeDef* p = GET_GPIO_PORT(pin);

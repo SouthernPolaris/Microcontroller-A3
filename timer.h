@@ -1,5 +1,5 @@
-/*!
- * \brief     Controller for a hardware timer module.
+/**
+ * Controller for timer 0 hardware
  */
 #ifndef TIMER_H
 #define TIMER_H

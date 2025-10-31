@@ -77,5 +77,3 @@ void TIMER0_IRQHandler(void){
 		}
 	
 }
-
-// *******************************ARM University Program Copyright © ARM Ltd 2014*************************************   
