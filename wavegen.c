@@ -26,52 +26,79 @@ uint32_t interrupt_rate_us = DEFAULT_INTERRUPT_US; /* microseconds */
 // Update waveform output based on current settings
 static void wavegen_update(void) {
     volatile uint32_t steps;
-    volatile uint32_t idx;
 
-    volatile uint32_t half;
 	volatile int delay_val;
 
     steps = samples_per_period;
-    idx = sample_idx;
-    val = 0;
 
 	// Avoid division by zero
 	if (steps < 2) steps = 2;
-	half = steps / 2;
 
 	// Generate waveform samples
-	for(idx = sample_idx; idx < STEPS_PER_WAVEFORM; idx++) {
-		switch (currentWaveform) {
-			case SQUARE:
-				if (idx < (STEPS_PER_WAVEFORM / 2)) {
-					val = MAX_DAC_VALUE;
-				} else {
-					val = 0;
-				}
-				break;
-			case TRIANGLE:
-				if (idx < (STEPS_PER_WAVEFORM / 2)) {
-					val += (MAX_DAC_VALUE / (STEPS_PER_WAVEFORM / 2));
-				} else {
-					val -= (MAX_DAC_VALUE / (STEPS_PER_WAVEFORM / 2));
-				}
-				break;
-			case SAWTOOTH:
-				val += ((MAX_DAC_VALUE) / (STEPS_PER_WAVEFORM));
-				break;
-			default:
-				val = 0;
-				break;
-
-		}
-		
-		if (val > MAX_DAC_VALUE) val = MAX_DAC_VALUE;
-					dac_set((int)val);
-
-		delay_val = (steps * interrupt_rate_us) / STEPS_PER_WAVEFORM;
-		delay_us(delay_val);
-	}
+	wavegen_step();
+	delay_val = (steps * interrupt_rate_us) / STEPS_PER_WAVEFORM;
 	
+	// Avoid too small delay values
+	if (delay_val < 2) {
+		delay_val = 2;
+	}
+
+	timer_set_match_us(delay_val);
+}
+
+/**
+ * Set timer match register based on microsecond delay
+ * \param us Delay in microseconds
+ */
+static inline void timer_set_match_us(uint32_t us) {
+	uint32_t pclk = SystemCoreClock / 4;
+	uint32_t ticks = (pclk / 1000000) * us;
+	LPC_TIM0 -> MR0 = ticks;
+	
+	// Unsure if resetting TC is necessary here
+	LPC_TIM0->TC = 0;
+}
+
+/**
+ * Generate the next sample of the waveform
+ */
+static void wavegen_step(void) {
+	volatile uint32_t idx;
+
+	idx = sample_idx;
+
+	switch (currentWaveform) {
+		case SQUARE:
+			if (idx < (STEPS_PER_WAVEFORM / 2)) {
+				val = MAX_DAC_VALUE;
+			} else {
+				val = 0;
+			}
+			break;
+		case TRIANGLE:
+			if (idx < (STEPS_PER_WAVEFORM / 2)) {
+				val += (MAX_DAC_VALUE / (STEPS_PER_WAVEFORM / 2));
+			} else {
+				val -= (MAX_DAC_VALUE / (STEPS_PER_WAVEFORM / 2));
+			}
+			break;
+		case SAWTOOTH:
+			val += ((MAX_DAC_VALUE) / (STEPS_PER_WAVEFORM));
+			break;
+		default:
+			val = 0;
+			break;
+	}
+
+	if (val > MAX_DAC_VALUE) val = MAX_DAC_VALUE;
+	dac_set((int)val);
+
+	sample_idx++;
+	if (sample_idx >= samples_per_period) {
+		sample_idx = 0;
+		val = 0;
+	}
+
 }
 
 /**
@@ -89,9 +116,10 @@ void wavegen_init(void) {
  * \param type Waveform type to set
  */
 void wavegen_setWaveform(wavetype type) {
-		if (currentWaveform != type) {
-			val = 0;
-		}
+	if (currentWaveform != type) {
+		val = 0;
+	}
+
     currentWaveform = type;
     sample_idx = 0; /* Reset sample index when changing waveform */
 }

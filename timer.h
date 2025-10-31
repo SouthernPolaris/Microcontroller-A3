@@ -1,5 +1,5 @@
 /**
- * Controller for timer 0 hardware
+ * Controller for timer 0 peripheral
  */
 #ifndef TIMER_H
 #define TIMER_H
